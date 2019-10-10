@@ -1,6 +1,8 @@
 package com.example.demospringcore;
 
 import com.example.demospringcore.connectdb.ConnectDB;
+import com.example.demospringcore.connectdb.ConnectMysql;
+import com.example.demospringcore.connectdb.ConnectPostgreSql;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ import static org.hamcrest.CoreMatchers.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
+@ActiveProfiles("dev")
 public class DemoSpringCoreApplicationTests {
 
 	@Autowired
@@ -35,8 +38,7 @@ public class DemoSpringCoreApplicationTests {
 		System.out.println(env.getProperty("xxx.yyy"));
 		assertThat(env.getProperty("xxx.yyy"),is("2"));
 		assertThat(applicationContext.getBean("connectMysql"),notNullValue());
-
-
+		assertThat(connectDB,instanceOf(ConnectMysql.class));
 	}
 
 	@Test
@@ -44,6 +46,7 @@ public class DemoSpringCoreApplicationTests {
 		System.out.println(env.getProperty("xxx.yyy"));
 		assertThat(env.getProperty("xxx.yyy"),is("3"));
 		assertThat(applicationContext.getBean("connectPostgreSql"),notNullValue());
+		assertThat(connectDB,instanceOf(ConnectPostgreSql.class));
 
 	}
 }
