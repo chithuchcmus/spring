@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Profile("dev")
-
 public class ConnectMysql  implements  ConnectDB{
     private String name;
     public ConnectMysql()
