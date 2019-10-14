@@ -15,36 +15,25 @@ public class TestDonotCloseConnection {
 
     @Test
     public void test_getConnection_WhenItReachMaxConnection() throws SQLException, ClassNotFoundException {
-
-    	//give
+        //give
         Class.forName("com.mysql.cj.jdbc.Driver");
         Connection connection = null;
-        Connection lastConnection = null;
-        int numberConnection = 5;
-        try{
-			for (int i = 1; i <= numberConnection; i++) {
-				connection = null;
-				connection = DriverManager
-						.getConnection("jdbc:mysql://localhost:3306/test", "root", "1234");
-				System.out.println(connection);
-			}
-			//when
-			lastConnection = DriverManager
-					.getConnection("jdbc:mysql://localhost:3306/test", "root", "1234");
-
-		}
-        catch (SQLNonTransientConnectionException e)
-		{
-			System.out.println(e.getMessage());
-		}
-
-        System.out.println(connection);
-		System.out.println(lastConnection);
-
-		//then
-		//when limit connection, if we continue get conection,it will be null
-		Assert.assertNull(lastConnection);
-
+        Connection beyondLimitConnection = null;
+        int maxConnectionToDb = 5;
+        for (int i = 1; i <= maxConnectionToDb; i++) {
+            connection = null;
+            connection = DriverManager
+                    .getConnection("jdbc:mysql://localhost:3306/test", "root", "1234");
+            System.out.println(connection);
+        }
+        try {
+            //when
+            beyondLimitConnection = DriverManager
+                    .getConnection("jdbc:mysql://localhost:3306/test", "root", "1234");
+        } catch (SQLException e) {
+            //then
+            Assert.assertEquals("Data source rejected establishment of connection,  message from server: \"Too many connections\"",
+                    e.getMessage());
+        }
     }
-
 }

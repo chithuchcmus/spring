@@ -46,20 +46,11 @@ public class TestSpeedConnection {
         System.out.println("timeRunWhenDonotCloseConnection: " + timeRunWhenDonotCloseConnection);
         Assert.assertTrue(timeRunWhenDonotCloseConnection < timeRunWhenCloseConnection);
         connection.close();
-}
+    }
 
     public void getListStudentFromDb(Connection connection) throws SQLException {
-        try{
-            Statement stmt = connection.createStatement();
-            String selectSql = "SELECT * FROM students";
-            ResultSet resultSet = stmt.executeQuery(selectSql);
-//            while (resultSet.next()) {
-//                System.out.println(resultSet.getString("user_name"));
-//                System.out.println(resultSet.getString("pass_word"));
-//            }
-        }catch (SQLException e)
-        {
-            e.getMessage();
-        }
+        Statement stmt = connection.createStatement();
+        String selectSql = "SELECT * FROM students";
+        ResultSet resultSet = stmt.executeQuery(selectSql);
     }
 }
