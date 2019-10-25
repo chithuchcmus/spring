@@ -20,6 +20,6 @@ code demo in folder `spring-jdbc`
 
 ## Spring Transactional management
 
-report about transactional management [here](./transactional-management/transactional-management.md)
+report about transactional management [here](./transactional-management/transaction-management.md)
 
 code demo in folder `spring-transactional-management`: unit test about @Transactional: Require, Require New, Read-only
