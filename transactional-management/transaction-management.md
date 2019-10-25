@@ -278,10 +278,8 @@ Example [here](#required-behavior)
 khi khai báo @transactional ở các method private và protected thì method đó sẽ vẫn  chạy bình thường mà không có cơ chế transaction.
 
 Bởi vì: https://stackoverflow.com/questions/34197964/why-doesnt-springs-transactional-work-on-protected-methods
-`
-Due to the proxy-based nature of Spring's AOP framework, protected methods are by definition not intercepted, neither for JDK proxies (where this isn't applicable) nor for CGLIB proxies (where this is technically possible but not recommendable for AOP purposes). As a consequence, any given pointcut will be matched against public methods only!
 
-`
+`Due to the proxy-based nature of Spring's AOP framework, protected methods are by definition not intercepted, neither for JDK proxies (where this isn't applicable) nor for CGLIB proxies (where this is technically possible but not recommendable for AOP purposes). As a consequence, any given pointcut will be matched against public methods only!`
 
 ## Does @Transactional work with self-invocation?
 
@@ -290,8 +288,5 @@ Cụ thể trong trường hợp này khi self-invocation thì thay vì gọi th
 ![x](https://docs.spring.io/spring/docs/4.2.x/spring-framework-reference/html/images/tx.png)
 
 
-`
-In proxy mode (which is the default), only 'external' method calls coming in through the proxy will be intercepted. This means that 'self-invocation', i.e. a method within the target object calling some other method of the target object, won't lead to an actual transaction at runtime even if the invoked method is marked with @Transactional!
-
-`
+`In proxy mode (which is the default), only 'external' method calls coming in through the proxy will be intercepted. This means that 'self-invocation', i.e. a method within the target object calling some other method of the target object, won't lead to an actual transaction at runtime even if the invoked method is marked with @Transactional!`
 
