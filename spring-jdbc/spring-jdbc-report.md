@@ -140,7 +140,7 @@ public List<Employee> getAllEmployeesRowMapper(){
         Employee e=new Employee();  
         e.setId(rs.getInt(1));  
         e.setName(rs.getString(2));  
-        e.setSalary(rs.getInt(3));  
+        e.setSalary(rs.getInt(3));      
         return e;  
     }  
     });  

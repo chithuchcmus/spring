@@ -6,8 +6,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 public interface PersonDao {
-    Person getPersonByFirstname(String firstName);
-
-    List<Person> getAllPersons();
+    public List<Person> getPersonByFirstname(String firstName);
+    public List<Person> getPersonByLastName(String firstName);
+    public List<Person> getAllPersons();
+    public Person getPersonByAge(int age);
+    public int savePerson(Person person);
+    public int updatePersonByLastName(String lastName, Person person);
+    public int deletePersonByAge(Integer age);
 
 }

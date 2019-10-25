@@ -19,7 +19,7 @@
 
 ## What is IoC?
 
-Inversion of Control (IoC) là một nguyên lý thiết kế trong công nghệ phần mềm với các đoạn code khi đưa vào một framework sẽ nhận được luồng điều khiển từ framework hay nói một cách khác là được framework điều khiển. Kiến trúc phần mềm với thiết kế này sẽ đảo ngược quyền điều khiển so với lập trình hướng thủ tục truyền thống. Trong lập trình truyền thống các đoạn code thêm vào sẽ gọi các thư viện nhưng với IoC, framework sẽ gọi các mã thêm vào.
+Inversion of Control (IoC) là một nguyên lý thiết kế trong công nghệ phần mềm với các đoạn code khi đưa vào một framework sẽ nhận được luồng điều khiển từ framework hay nói một cách khác là được framework điều khiển. Kiến trúc phần mềm với thiết kế này sẽ đảo ngược quyền điều khiển so với lập trình hướng thủ tục truyền thống. Thay vì tự quản lí các object đối tượng thì ta đưa quyền quản lí đó lại cho framework quản lí và chỉ việc sử dụng.
 
 
 https://www.baeldung.com/inversion-control-and-dependency-injection-in-spring

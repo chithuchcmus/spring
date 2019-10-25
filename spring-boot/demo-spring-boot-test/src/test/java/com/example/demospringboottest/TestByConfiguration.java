@@ -2,6 +2,7 @@ package com.example.demospringboottest;
 
 import com.example.demospringboottest.model.Employee;
 import com.example.demospringboottest.model.Student;
+import com.example.demospringboottest.service.EmployeeService;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,6 +56,9 @@ public class TestByConfiguration {
 
     @Autowired
     private ApplicationContext applicationContext;
+
+    @Autowired
+    EmployeeService employeeService;
 
     @Test
     public void test_onlyLoadBeanIsConfigedIntoCtx_WithTestConfiguration() {
