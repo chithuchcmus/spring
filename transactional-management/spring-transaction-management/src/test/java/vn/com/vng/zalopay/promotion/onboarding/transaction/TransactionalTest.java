@@ -123,23 +123,20 @@ public class TransactionalTest {
 
     @Test
     public void testReadOnlyUpdateDB() {
-        // GIVEN mixed transaction propagation setup
+        // GIVEN  transaction read only setup
         // WHEN
-        try {
-            innerReadonlyService.save();
-        } catch (Exception e) {
-            assertThat(e.getMessage(), is("Error occurs"));
-        }
+        innerReadonlyService.save();
+        // THEN
         assertThat(personRepository.countByName(InnerReadonlyServiceImpl.class.getSimpleName()), is(1));
     }
 
     @Test
     public void testReadOnlyCallReadWriteTransaction()
     {
-        // GIVEN mixed transaction propagation setup
+        // GIVEN mixed transaction read-only setup
         // WHEN
         outerTransactionReadOnlyService.executeReadWrite();
-        // THEN "REQUIRES_NEW" transaction committed successfully
+        // THEN "READ ONLY AND REQUIRE" transaction committed successfully
         assertThat(personRepository.countByName(OuterReadOnlyServiceImpl.class.getSimpleName()), is(1));
         assertThat(personRepository.countByName(InnerRequiredServiceImpl.class.getSimpleName()), is(1));
     }
@@ -147,10 +144,10 @@ public class TransactionalTest {
     @Test
     public void testReadWriteCallReadOnlyTransaction()
     {
-        // GIVEN mixed transaction propagation setup
+        // GIVEN mixed transaction read-only setup
         // WHEN
         outerTransactionalService.executeReadOnly();
-        // THEN "REQUIRES_NEW" transaction committed successfully
+        // THEN "READ ONLY AND REQUIRE" transaction committed successfully
         assertThat(personRepository.countByName(OuterTransactionalServiceImpl.class.getSimpleName()), is(1));
         assertThat(personRepository.countByName(InnerReadonlyServiceImpl.class.getSimpleName()), is(1));
 
