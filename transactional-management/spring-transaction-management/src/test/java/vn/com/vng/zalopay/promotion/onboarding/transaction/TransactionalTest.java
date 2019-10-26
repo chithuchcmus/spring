@@ -126,7 +126,7 @@ public class TransactionalTest {
         // GIVEN  transaction read only setup
         // WHEN
         innerReadonlyService.save();
-        // THEN
+        // THEN READ-ONLY CAN COMMIT Successful
         assertThat(personRepository.countByName(InnerReadonlyServiceImpl.class.getSimpleName()), is(1));
     }
 
@@ -136,7 +136,7 @@ public class TransactionalTest {
         // GIVEN mixed transaction read-only setup
         // WHEN
         outerTransactionReadOnlyService.executeReadWrite();
-        // THEN "READ ONLY AND REQUIRE" transaction committed successfully
+        // THEN "READ ONLY AND READ-WRITE" transaction committed successfully
         assertThat(personRepository.countByName(OuterReadOnlyServiceImpl.class.getSimpleName()), is(1));
         assertThat(personRepository.countByName(InnerRequiredServiceImpl.class.getSimpleName()), is(1));
     }
@@ -147,7 +147,7 @@ public class TransactionalTest {
         // GIVEN mixed transaction read-only setup
         // WHEN
         outerTransactionalService.executeReadOnly();
-        // THEN "READ ONLY AND REQUIRE" transaction committed successfully
+        // THEN "READ ONLY AND READ-WRITE" transaction committed successfully
         assertThat(personRepository.countByName(OuterTransactionalServiceImpl.class.getSimpleName()), is(1));
         assertThat(personRepository.countByName(InnerReadonlyServiceImpl.class.getSimpleName()), is(1));
 
