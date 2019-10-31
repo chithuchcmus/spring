@@ -39,24 +39,48 @@ Các loại Mapping:
 ## JPA Entity 
 
 ### JPA Entity LifeCycle
-![x](https://i0.wp.com/www.javabullets.com/wp-content/uploads/2017/08/entityManager_javabullets.png?resize=750%2C283&ssl=1)
+
+với Entity Manager
+
+![x](https://vladmihalcea.com/wp-content/uploads/2014/07/jpaentitystates.png)
+
+Với Session
+
+![x](https://vladmihalcea.com/wp-content/uploads/2014/07/hibernateentitystates1.png)
 
 - Null: object chưa tồn tại
 - New: object được khởi tạo và chưa liên quan đến EntityManager và DB
-- Managed: ở trạng thái này, object đã được persisted và được quản lí bởi EntityManager. bằng cách sử dụng phương thức persist. hoặc là các object được truy vấn từ DB.Khi persist thì có thể xảy ra các exception sau
+- Persistent (Managed): ở trạng thái này, object đã được persisted và được quản lí bởi EntityManager (Persistence Context). bằng cách sử dụng phương thức persist. hoặc là các object được truy vấn từ DB.Khi persist thì có thể xảy ra các exception sau
     - IllegalArgumentException: persist các object không phải entity
     - TransactionRequiredException: không có transaction khi thay đổi db
     - EntityExistsException:  nếu entity đã tồn tại trong database với cùng primary key.
-- Detached: ở trạng thái này Entity bị xóa khỏi sự quản lí của EntityManager nhưng vẫn còn tồn tại trong DB. Và khi ở trạng thái này, các entity có thể được sử dụng lại bởi các EntityManager bằng phương thức merge.
+- Detached: ở trạng thái này Entity bị xóa khỏi sự quản lí của Persistence Context nhưng vẫn còn tồn tại trong DB. Và không còn được cập nhật ở database. Để có thể liên kết lại với database thì ta có thể sử dụng Merging.
+
+
+- Merging: copy Entity đến EntityManager mà nó merge. Detached entity vẫn còn ở trạng thái đó kể cả sau khi thực hiện phương thức merge. Nếu có sự thay đổi nào cũng entity được merge với dữ liệu đã lưu trong DB thì nó sẽ được cập nhật vào DB.
+
 ```java
-    EntityManager em = getEntityManager();
-    Movie movie = getMovie(1L);
-    em.detach(movie);
-    movie.setLanguage("Italian");
-    em.getTransaction().begin();
-    em.merge(movie);
-    em.getTransaction().commit();
+post.setTitle("High-Performance Java Persistence Rocks!");
+ 
+doInJPA(entityManager -> {
+    LOGGER.info("Merging the Post entity");
+    Post post_ = entityManager.merge(post);
+});
 ```
+ở dưới nó sẽ thực hiện các  câu lệnh sau
+```sql
+
+-- Merging the Post entity
+SELECT p.id AS id1_0_0_ ,
+       p.title AS title2_0_0_
+FROM   post p
+WHERE  p.id = 1
+ 
+UPDATE post
+SET title='High-Performance Java Persistence Rocks!'
+WHERE id=1
+```
+
 - Remove: xóa Object khỏi DB, cần để trong transaction
 
 Với lifecycle như vậy thì chúng gắn liền với một số annotation sau
@@ -72,7 +96,7 @@ Nếu bất kì pre-post method xảy ra exception thì transaction sẽ rollbac
 tập hợp tất cả các object được quản lí của EntityManager. Nếu object được truy vấn đã tồn tại trong persistenceContext, thì object được trả về mà không cần thực sự truy cập vào DB (ngoại từ refresh).
 
 Nguyên lí của nó là đảm bảo không có entity Object nào được thể hiện hơn một lần trong memory trong cùng EntityManager. Mỗi EntityManager có riêng persistenceContext. Do đó với các EntityManager khác nhau có  thể có các Object Entity trong memory khác nhau
-Do đó Các entity Object có thể bị dọn dẹp biwr garbage collector khi lâu không được sử dụng. Ta có thể cấu hình để có thể thay đổi thông qua `strong references`.
+Do đó Các entity Object có thể bị dọn dẹp bởi garbage collector khi lâu không được sử dụng. Ta có thể cấu hình để có thể thay đổi thông qua `strong references`.
 
 Persistence Context có thể được xóa thông qua phương thức `clear()`. Khi đó bất kì thay đổi trên các entity object được quản lí bởi instance EntityManager đó sẽ không đồng bộ với database. 
 
@@ -102,16 +126,6 @@ class Employee {
 ```
 mặc định  non collection and map references  thì sẽ là FetchType.EAGER, nhưng với FetchType.Lazy thì nó có cơ chế tương tự như `Hollow object`. Với persistent collection and map fields là  FetchType.LAZY.
 
-### Retrieval by Navigation and Access
-
-As seen, the entire graph of objects is available for navigation, regardless of the fetch policy. The fetch policy, however, does affect performance. Eager retrieval might minimize the round trips to the database and improve performance, but unnecessary retrieval of entity objects that are not in use will decrease performance.
-
-Transparent activation is not supported for detached objects.
-
-### Retrieval by Refresh
-
-Toàn bộ content của managed trong bộ nhớ được reload lại từ database. nó có thể giúp ích để đẩm bảo rằng ứng dụng cập nhật mới nhất và chỉ được sử dụng trong trường hợp bị thay đổi bởi các EntityManager khác.
-
 
 ## JPA Entity Manager
 
@@ -121,17 +135,7 @@ vai trò của Entity
 - Được dùng để đọc, xóa và viết trên các entity
 - các đối tượng tham chiếu được quản lí bởi entity manager.
 
-Entity manager được cung cấp thông qua EntityManagerFactory. mà EntityManagerFactory lại được tạo ra bằng persistence. Ví dụ như 
-```java
-EntityManagerFactory emf=Persistence.createEntityManagerFactory("Student_details");  
-
-EntityManager em=emf.createEntityManager();  
-em.getTransaction().begin();  
-em.persist(s1);  
-em.getTransaction().commit();  
-emf.close();  
-em.close();  
-```
+Entity manager được cung cấp thông qua EntityManagerFactory. mà EntityManagerFactory lại được tạo ra bằng persistence.
 
 Việc khởi tạo EntityManagerFactory  cho ứng dụng rất tốn tài nguyên, nhưng việc khởi tạo Entity manager thì inexpensive. Lưu ý, với việc khởi tạo một instance Entity manager cho toàn ứng dụng sẽ dẫn đến không đảm bảo thread-safe, vì với mỗi Entity manager sẽ chỉ có một Entity transactional
 
@@ -148,12 +152,68 @@ Còn các định dạng phía sau như
 - hibernate.format_sql: properties được dùng trong trường hợp các bạn cần hiển thị câu lệnh SQL của Hibernate ra console và chúng phải được định dạng để chúng ta có thể dễ dàng đọc được.
 - hibernate.use_sql_comments: properties này được dùng với Hibernate trong trường hợp các bạn muốn biết câu lệnh SQL đang muốn làm gì.
 
+## JPA GeneratedValue
+
+## JPA Cascade Types
+
+- CascadeType.PERSIST: Có nghĩa là các operation như persist() hoặc save() mới liên quan đến related entities, chúng sẽ lưu vào DB cùng 
+- CascadeType.MERGE: Có nghĩa là operation merge() liên quan đến related entities, chúng sẽ cùng merge() với  owner entity mà nó liên kết
+- CascadeType.REFRESH: các related entites  sẽ cùng được refesh với owner entity nó liên kết
+- CascadeType.REMOVE: cascade type remove removes all related entities association with this setting when the owning entity is deleted.
+- CascadeType.DETACH : cascade type detach detaches all related entities if a “manual detach” occurs.
+- CascadeType.ALL : cascade type all is shorthand for all of the above cascade operations.
+
+Ví dụ như 
+```java
+@OneToMany(cascade={CascadeType.REFRESH, CascadeType.MERGE}, fetch = FetchType.LAZY)
+@JoinColumn(name="EMPLOYEE_ID")
+private Set<AccountEntity> accounts;
+```
+
+##  Generated Identifiers
+
+### AUTO Generation
+
+Nếu để mặc định thì persistence provider sẽ dựa vào kiểu của ID để xác định chọn cho nó là UUID hoặc numerical.
+
+Với numerical thì ID sẽ được tạo dựa trên sequence or table generator, còn UUID sẽ được tạo dựa trên UUIDGenerator.
+
+### IDENTITY
+
+```java
+@Id
+@GeneratedValue(strategy = GenerationType.IDENTITY)
+private Long id;
+```
+
+```sql
+INSERT INTO post (id, title)
+VALUES (DEFAULT, 'High-Performance Java Persistence')
+```
+
+Giá trị dựa trên identity column trong database, tức  là chúng tự động tăng  và nó có chức năng `disables batch updates.`
+
+### SEQUENCE Generation
+
+khi sử dụng SEQUENCE identifier strategy, thì hibernate generates ra câu lệnh sql như sau
+
+```sql
+CALL NEXT VALUE FOR 'hibernate_sequence'
+ 
+-- The post entity identifier is 1
+ 
+-- Flush Persistence Context
+ 
+INSERT INTO post (title, id)
+VALUES ('High-Performance Java Persistence', 1)
+```
+generater này sử dụng sequences  nếu database có hỗ trợ và nếu không chúng sẽ tạo một bảng để generate.
+
 ## JPA - JPQL
 
 Tính năng của JPQL
 - Độc lập với query language.
 - Đơn giản
--
 
 https://thoughts-on-java.org/jpql/
 
