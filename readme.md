@@ -28,7 +28,7 @@ code demo in folder `spring-transactional-management`: unit test about @Transact
 
 report about jpa [here](./jpa/readme.md)
 
-additonal about jpa include @OneToOne, how convert property in Entity into Table in database [here](./jpa/additonal.md)
+additonal about jpa include @OneToOne, how convert property in Entity into Table in database [here](./jpa/additional.md)
 
 code demo in folder `jpa`: Entity Manager managed
 
