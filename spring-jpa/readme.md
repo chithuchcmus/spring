@@ -12,8 +12,7 @@ cung cấp repository hỗ trợ cho JPA. Nó giúp giảm các thao tác cần 
 - Support QueryDSL and JPA queries
 
 - Support for batch loading, sorting, dynamical queries
-
-- Reduce code size for generic CRUD operations, giảm việc lặp đi lặp lại code, chỉ cần các thao tác đơn giản.
+- Generated queries.
 
 ## Bootstrap mode
 
