@@ -3,12 +3,13 @@ package com.example.entityrelation.dao;
 import com.example.entityrelation.entities.Post;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 
 
-@Component
+@Repository
 public class PostDaoImpl implements PostDao {
 
     @Autowired
@@ -16,7 +17,9 @@ public class PostDaoImpl implements PostDao {
 
     @Override
     public Post findPostById(Long id) {
-        return  entityManager.find(Post.class,1L);
+        return entityManager.createQuery("select p from Post p where p.id =:id",Post.class)
+                .setParameter("id",id).getResultList().get(0);
+        //return  entityManager.find(Post.class,1L);
     }
 
     @Override

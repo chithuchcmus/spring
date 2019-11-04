@@ -57,28 +57,46 @@ Với Session
 - Detached: ở trạng thái này Entity bị xóa khỏi sự quản lí của Persistence Context nhưng vẫn còn tồn tại trong DB. Và không còn được cập nhật ở database. Để có thể liên kết lại với database thì ta có thể sử dụng Merging.
 
 
-- Merging: copy Entity đến EntityManager mà nó merge. Detached entity vẫn còn ở trạng thái đó kể cả sau khi thực hiện phương thức merge. Nếu có sự thay đổi nào cũng entity được merge với dữ liệu đã lưu trong DB thì nó sẽ được cập nhật vào DB.
+- Merging: tìm object attached với cùng id và update chúng, nếu tồn tại object đó, nó sẽ update và trả về attached update. nếu không có tồn tại thì nó sẽ  insert mới vào DB.
+
+Ví dụ về merge() và persist()
 
 ```java
-post.setTitle("High-Performance Java Persistence Rocks!");
- 
-doInJPA(entityManager -> {
-    LOGGER.info("Merging the Post entity");
-    Post post_ = entityManager.merge(post);
-});
-```
-ở dưới nó sẽ thực hiện các  câu lệnh sau
-```sql
+{
+    AnyEntity newEntity;
+    AnyEntity nonAttachedEntity;
+    AnyEntity attachedEntity;
 
--- Merging the Post entity
-SELECT p.id AS id1_0_0_ ,
-       p.title AS title2_0_0_
-FROM   post p
-WHERE  p.id = 1
- 
-UPDATE post
-SET title='High-Performance Java Persistence Rocks!'
-WHERE id=1
+    // Create a new entity and persist it        
+    newEntity = new AnyEntity();
+    em.persist(newEntity);
+
+    // Save 1 to the database at next flush
+    newEntity.setValue(1);
+
+    // Create a new entity with the same Id than the persisted one.
+    AnyEntity nonAttachedEntity = new AnyEntity();
+    nonAttachedEntity.setId(newEntity.getId());
+
+    // Save 2 to the database at next flush instead of 1!!!
+    nonAttachedEntity.setValue(2);
+    attachedEntity = em.merge(nonAttachedEntity);
+
+    // This condition returns true
+    // merge has found the already attached object (newEntity) and returns it.
+    if(attachedEntity==newEntity) {
+            System.out.print("They are the same object!");
+    }
+
+    // Set 3 to value
+    attachedEntity.setValue(3);
+    // Really, now both are the same object. Prints 3
+    System.out.println(newEntity.getValue());
+
+    // Modify the un attached object has no effect to the entity manager
+    // nor to the other objects
+    nonAttachedEntity.setValue(42);
+}
 ```
 
 - Remove: xóa Object khỏi DB, cần để trong transaction
@@ -151,8 +169,6 @@ Khi sử dụng tập tin Persistence.xml trong persistence-unit có sử dụng
 Còn các định dạng phía sau như
 - hibernate.format_sql: properties được dùng trong trường hợp các bạn cần hiển thị câu lệnh SQL của Hibernate ra console và chúng phải được định dạng để chúng ta có thể dễ dàng đọc được.
 - hibernate.use_sql_comments: properties này được dùng với Hibernate trong trường hợp các bạn muốn biết câu lệnh SQL đang muốn làm gì.
-
-## JPA GeneratedValue
 
 ## JPA Cascade Types
 

@@ -32,21 +32,26 @@ class EntityRelationApplicationTests {
 	private PostService postService;
 
 	@Test
-	void test_CreateAndSavePost() {
+	public void test_CreateAndSavePost() {
 		//give, create post
 		Post post = initPost();
 		//when save post
 		postService.savePost(post);
 		//then
 		Post postFromDb = postService.findPostById(1L);
-		List<PostComment> postCommentList = postFromDb.getComments();
-		for (PostComment postComment : postCommentList)
-		{
-			System.out.println(postComment.getReview());
-		}
 		System.out.println(postFromDb.getTitle());
 		System.out.println(postFromDb.getId());
 
+	}
+
+	@Test
+	public void test_deleteEntityFromDb()
+	{
+		//give, create post
+		Post post = initPost();
+		postService.savePost(post);
+
+		//when save post
 	}
 	public Post initPost()
 	{

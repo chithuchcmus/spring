@@ -2,6 +2,7 @@ package com.example.entityrelation.service;
 
 import com.example.entityrelation.dao.PostDao;
 import com.example.entityrelation.entities.Post;
+import com.example.entityrelation.entities.PostComment;
 import com.example.entityrelation.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,13 +19,16 @@ public class PostServiceImpl implements PostService {
     private PostDao postDao;
 
     @Override
-    @Transactional(propagation= Propagation.REQUIRED, readOnly=true, noRollbackFor=Exception.class)
+    @Transactional
     public Post findPostById(Long id) {
-        return postRepository.findPostById(id);
+        Post post =  postDao.findPostById(id);
+        post.getComments();
+        return post;
     }
+
     @Override
-    @Transactional(propagation=Propagation.REQUIRED, readOnly=true, noRollbackFor=Exception.class)
+    @Transactional
     public void savePost(Post post) {
-        postRepository.save(post);
+        postDao.savePost(post);
     }
 }

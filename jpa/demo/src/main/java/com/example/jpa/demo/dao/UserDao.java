@@ -1,7 +1,6 @@
 package com.example.jpa.demo.dao;
 
 import com.example.jpa.demo.model.User;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 

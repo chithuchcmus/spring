@@ -46,12 +46,12 @@ class JpaDemoApplicationTests {
 		//give, save new user to DB
 		jpaService.saveUser("chi thuc","thuc@gmail.com");
 
-		// when, get user just saved
+		// when, get user just saved and deleted it from DB
 		User userFromDB = jpaService.getLastUser();
 		jpaService.deleteUser(userFromDB);
 
 		// then, check exist user have email thuc@gmail.com, user is last of list user get from db
-		Assert.assertNull(jpaService.getAllUser());
+		Assert.assertNull(jpaService.getLastUser());
 	}
 
 }
