@@ -1,3 +1,12 @@
+
+- [Additional](#additional)
+  - [Các Annotaion Relation giữa các entity](#c%c3%a1c-annotaion-relation-gi%e1%bb%afa-c%c3%a1c-entity)
+  - [One To One](#one-to-one)
+    - [Using a Foreign Key In One Table](#using-a-foreign-key-in-one-table)
+    - [Cách tốt nhất để thực hiện việc mapping OneToOne, share primary key](#c%c3%a1ch-t%e1%bb%91t-nh%e1%ba%a5t-%c4%91%e1%bb%83-th%e1%bb%b1c-hi%e1%bb%87n-vi%e1%bb%87c-mapping-onetoone-share-primary-key)
+  - [Auto generate field từ Entity Vào DATABASE](#auto-generate-field-t%e1%bb%ab-entity-v%c3%a0o-database)
+  - [Với việc cấu hình trong Database nhưng đặt tên thuộc tính trên Entity khác với database thì sẽ như thế nào?](#v%e1%bb%9bi-vi%e1%bb%87c-c%e1%ba%a5u-h%c3%acnh-trong-database-nh%c6%b0ng-%c4%91%e1%ba%b7t-t%c3%aan-thu%e1%bb%99c-t%c3%adnh-tr%c3%aan-entity-kh%c3%a1c-v%e1%bb%9bi-database-th%c3%ac-s%e1%ba%bd-nh%c6%b0-th%e1%ba%bf-n%c3%a0o)
+
 # Additional
 
 ## Các Annotaion Relation giữa các entity

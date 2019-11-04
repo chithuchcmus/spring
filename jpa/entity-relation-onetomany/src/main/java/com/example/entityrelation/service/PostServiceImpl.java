@@ -21,7 +21,7 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public Post findPostById(Long id) {
-        Post post =  postDao.findPostById(id);
+        Post post =  postRepository.findPostById(id);
         post.getComments();
         return post;
     }
@@ -29,6 +29,11 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public void savePost(Post post) {
-        postDao.savePost(post);
+        postRepository.save(post);
+    }
+
+    @Override
+    public void deletePost(Post post) {
+
     }
 }

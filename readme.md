@@ -23,3 +23,16 @@ code demo in folder `spring-jdbc`
 report about transactional management [here](./transactional-management/transaction-management.md)
 
 code demo in folder `spring-transactional-management`: unit test about @Transactional: Require, Require New, Read-only
+
+## JPA
+
+report about jpa [here](./jpa/readme.md)
+
+additonal about jpa include @OneToOne, how convert property in Entity into Table in database [here](./jpa/additonal.md)
+
+code demo in folder `jpa`: Entity Manager managed
+
+code demo in folder `entity-relation-onetomany`: @OneToMany
+
+code demo in folder `entity-relation-onetoone`: @OneToOne
+

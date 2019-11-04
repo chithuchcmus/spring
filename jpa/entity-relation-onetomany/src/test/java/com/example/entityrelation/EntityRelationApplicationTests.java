@@ -44,15 +44,6 @@ class EntityRelationApplicationTests {
 
 	}
 
-	@Test
-	public void test_deleteEntityFromDb()
-	{
-		//give, create post
-		Post post = initPost();
-		postService.savePost(post);
-
-		//when save post
-	}
 	public Post initPost()
 	{
 		Post post = new Post();

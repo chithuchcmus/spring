@@ -15,13 +15,11 @@ class JpaEntityApplicationTests {
     private PostService postService;
 
     @Test
-    public void contextLoads() {
+    public void testConnectWithDifferenctPropertyInDatabase() {
         postService.savePost(initPost());
         Post post = postService.findPostById(1L);
         post.getPostDetail().setAuthorPost("chi toai");
-
         postService.savePost(post);
-
         PostDetail postDetailFromDB = postService.findPostDetailById(1L);
         System.out.println(post.getPostDetail());
         System.out.println(post.getPostDetail().getAuthorPost());
