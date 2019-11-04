@@ -267,4 +267,11 @@ Với các Entity quy định tên table không giống với database thì Enti
 
 Và bên cạnh đó, hibernate sẽ update lại các primary key trên các entity đã mapping trùng khớp với table trong database. Nhưng dễ gây ra lỗi vì mapping không đồng nhất giữa các Entity với table trong database về các khóa chính và khóa ngoại.
 
+## Tài liệu tham khảo
+
+https://www.baeldung.com/jpa-one-to-one
+
+https://vladmihalcea.com/the-best-way-to-map-a-onetomany-association-with-jpa-and-hibernate/
+
+https://vladmihalcea.com/the-best-way-to-map-a-onetoone-relationship-with-jpa-and-hibernate/
 
