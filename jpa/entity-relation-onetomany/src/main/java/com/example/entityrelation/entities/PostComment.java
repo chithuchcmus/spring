@@ -3,7 +3,7 @@ package com.example.entityrelation.entities;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "post_comment")
+@Table(name = "comments")
 
 public class PostComment {
 
@@ -57,8 +57,5 @@ public class PostComment {
         if (!(o instanceof PostComment )) return false;
         return id != null && id.equals(((PostComment) o).getId());
     }
-    @Override
-    public int hashCode() {
-        return 31;
-    }
+
 }

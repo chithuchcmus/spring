@@ -19,8 +19,6 @@ import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@AutoConfigureJdbc
-@AutoConfigureTestDatabase
 @TestPropertySource(properties = {
 		"logging.level.ROOT=INFO",
 		"logging.level.org.springframework.jdbc.core=DEBUG",
@@ -50,8 +48,10 @@ class EntityRelationApplicationTests {
 		post.setTitle("new post");
 		PostComment postComment1 = new PostComment();
 		postComment1.setReview("post comment 1");
+		postComment1.setPost(post);
 		PostComment postComment2 = new PostComment();
 		postComment2.setReview("post comment 2");
+		postComment2.setPost(post);
 		post.addComment(postComment1);
 		post.addComment(postComment2);
 		return post;

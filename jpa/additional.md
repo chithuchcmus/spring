@@ -11,7 +11,7 @@
 
 ## Các Annotaion Relation giữa các entity
 
-@JoinColumn để cấu hình nó là một khóa ngoại, liên kết đến primary key của bảng Address. Nếu để mặc định (chỉ áp dụng cho single join column) thì nó sẽ có thuộc tính như sau
+@JoinColumn để cấu hình nó là một khóa ngoại, liên kết đến primary key của các Entity Có cấu hình quan hệ OneToMany với nó, ở đây là Entity Address. Nếu để mặc định (chỉ áp dụng cho single join column) thì nó sẽ có thuộc tính như sau
 - `name`: the name of entity + `_` + the name of the referenced primary key column.
 - `referencedColumnName`: cùng tên với primary key column of the referenced table.
 
@@ -122,6 +122,134 @@ Với việc cấu hình như trên, thì hibernate sẽ generate các table pos
 ![x](./images/foregin_key_post_detail.png)
 
 ta có thể thấy rằng, post_detail sử dụng post_id vừa là khóa chính, vừa là khóa ngoại reference đến primary key của table post, giống như ta đã cấu hình.
+
+
+
+## One to Many
+
+### Unidirectional @OneToMany
+
+Với mối quan hệ OneToMany mà khi ta chỉ cấu hình mối quan hệ ở Entity Parent, còn được gọi là `Unidirectional @OneToMany`, cụ thể như sau
+
+```java
+@Entity
+@Table(name = "post")
+public class Post {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String title;
+
+    //when child entity is removed from collection of parent, they will be deleted in DB
+    @OneToMany(
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY)
+    private List<PostComment> comments = new ArrayList<>();
+}
+
+//---------------------------------------------
+
+@Entity
+@Table(name = "comments")
+
+public class PostComment {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String review;
+}
+```
+
+với cách cấu hình một chiều từ parent sang child entity phía trên hibernate sẽ tạo trong database như sau
+
+![x](./images/one-to-many-1.png)
+
+Tương đương dưới database sẽ thể hiện như thế này
+
+![x](https://vladmihalcea.com/wp-content/uploads/2017/03/one-to-many.png)
+
+Nhìn mối quan hệ ta có thể thấy, dưới database chúng sẽ tạo ra thêm một bảng thứ ba, giống như mối quan hệ many-to-many, ta phải tốn thêm tài nguyên để lưu trữ, và việc đánh index two foregin key tốn thêm bộ nhớ cho việc đánh index này.
+
+### Unidirectional @OneToMany with @JoinColumn
+
+Tương tự như việc cấu hình như ví dụ trên, nhưng lần này ta thêm vào một annotation là `@JoinColumn` ở Entity Post như sau 
+
+```java
+@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+@JoinColumn(name = "post_id")
+private List<PostComment> comments = new ArrayList<>();
+```
+
+@JoinColumn thể hiện đây là khóa ngoại của bảng, và nó refference đến liên kết đã được định nghĩa với nó ở Entity khác bằng `@OneToMany`.
+
+Với cách định nghĩa như trên, thì dưới database, lần này sẽ chỉ tạo ra hai bảng, nhưng có vấn đề như sau, nó sẽ thực hiện thêm vài câu SQL hơn bình thường, cụ thể như sau
+
+```sql
+insert into post (title, id)
+values ('First post', 1)
+ 
+insert into post_comment (review, id)
+values ('My first review', 2)
+ 
+insert into post_comment (review, id)
+values ('My second review', 3)
+ 
+insert into post_comment (review, id)
+values ('My third review', 4)
+ 
+update post_comment set post_id = 1 where id = 2
+ 
+update post_comment set post_id = 1 where id =  3
+ 
+update post_comment set post_id = 1 where id =  4
+```
+
+Với việc cấu hình như vậy, khi insert hoặc delete thì nó sẽ thực hiện thêm một số câu lệnh sql, đầu tiên khi insert, nó sẽ chỉ insert các child Entity vào database, sau đó ở chúng mới được update thêm khóa ngoại, chứ không thực hiện liền ngay từ ban đầu, làm phát sinh thêm các câu SQL, kể cả việc xóa cũng như vậy.
+
+### Bidirectional @OneToMany (The best way)
+
+Với các cách liên kết phía trên, ta có thể thấy luôn có sự dư thừa ở các câu sql khi thực hiện các thao tác thêm, xóa dưới database. Để khắc phục thì ta có thể sử dụng thêm @ManyToOne ở Entity child.
+
+```java
+@Entity
+@Table(name="post")
+public class Post {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    private String titlePost;
+
+    //when child entity is removed from collection of parent, they will be deleted in DB
+    @OneToMany(
+            mappedBy = "post",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY)
+    private List<PostComment> comments = new ArrayList<>();
+}
+//-----------------------------------
+
+@Entity
+public class PostComment {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String review;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn
+    private Post post;
+}
+```
+
+Với cách thực hiện phía trên thì sự dư thừa ở các câu SQL sẽ được loại bỏ hoàn toàn, các khóa ngoại sẽ được thêm ngay từ ban đầu ở các câu lệnh insert của Table comments. Thêm nữa ở đây ta có thể truy cập parent Entity từ child Entity để lấy thông tin của parent.
 
 ## Auto generate field từ Entity Vào DATABASE
 
