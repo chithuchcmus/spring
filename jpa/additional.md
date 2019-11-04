@@ -27,12 +27,12 @@ Với các Annotation thể hiện mối liên kết thì kiểu fetch có ý ng
 
 Với database có quan hệ 1-1, sử dụng khóa chính của một bảng thành khóa ngoại của bảng kia. ví dụ như
 
-![x](https://www.baeldung.com/wp-content/uploads/2018/12/1-1_FK.png)
+![x](./images/one-to-one-1.png)
 
-Ở đây bảng user giữ khóa ngoại là address_id. Với cấu hình database như trên ta làm như sau, và ngược lại, với cấu hình như trên thì dưới database sẽ như thế này.
+Ở đây bảng Post giữ khóa ngoại là post_details_id. Với cấu hình database như trên ta làm như sau, và ngược lại, với cấu hình như trên thì dưới database sẽ như thế này.
 
 
-Đầu tiên với Entity User, ta cấu hình như sau, ta cần sử dụng @JoinColumn.
+Đầu tiên với Entity Post, ta cấu hình như sau, ta cần sử dụng @JoinColumn.
 
 ```java
 @Entity
@@ -50,7 +50,7 @@ public class Post {
 }
 ```
 
-với Entity Address thì ta cấu hình như sau
+với Entity PostDetails thì ta cấu hình như sau
 ```java
 @Entity
 public class PostDetails {
@@ -70,11 +70,11 @@ public class PostDetails {
 
 ### Cách tốt nhất để thực hiện việc mapping OneToOne, share primary key
 
-Chúng ta thay vì tạo cột mới trên  column users, ta có thể  đánh dấu cho primay key của User (user_id) vừa làm khóa chính vừa làm khóa ngoại đến Entity id.
+Chúng ta thay vì tạo cột mới trên  column Post, ta có thể  đánh dấu cho primay key của PostDetail (post_details_id) vừa làm khóa chính vừa làm khóa ngoại  refference đến Entity Post.
 
-![x](https://www.baeldung.com/wp-content/uploads/2018/12/1-1-SK.png)
+![x](./images/one-to-one-2.png)
 
-Với cách thực hiện như vậy, do PK và FK thường được đánh dấu Index nên việc chia sẻ như vậy có thể giảm index mà ta cần đánh dấu đi một nữa.
+Với cách thực hiện như vậy, do PK và FK thường được đánh dấu Index nên việc chia sẻ như vậy có thể giảm index mà ta cần đánh dấu đi một nữa mà tốc độ vẫn nhanh. 
 
 để implement ý tưởng phía trên với hai Entity ta làm như sau
 
