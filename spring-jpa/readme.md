@@ -1,17 +1,65 @@
 # Spring - JPA
 
+1. Spring Data JPA là gì?
+2. Spring giúp mình những gì?
+3. Cách sử dụng JPA Repository
+4. Làm sao mình khai báo query bằng method name, mà Spring hiểu và query được?
 
 ## Spring  Data JPA
 
-cung cấp repository hỗ trợ cho JPA. Nó giúp giảm các thao tác cần thiết (amount of boilerplate code) để có thể truy cập JPA data sources. Mà mục tiêu của Repository là giúp đơn giản, giảm bớt các mã cấu hình cần thiết để implement data access layer cho các persistence stores.
+Spring Data JPA is not a JPA provider.  It is a library / framework that adds an extra layer of abstraction on the top of our JPA provider.  the repository layer of our application contains three layers that are described in the following:
+- Spring Data JPA: hỗ trợ cho việc tạo ra các JPA repository bằng cách kế thừa Spring Data repository interface
+- Spring data commoms: provides the infrastructure that is shared by the datastore-specific Spring Data projects.
+- The JPA Provider: implement Java Persistence APi.
+
+Spring Data JPA adds a layer on top of JPA. That means it uses all features defined by the JPA specification, especially the entity and association mappings, the entity lifecycle management, and JPA’s query capabilities. On top of that, Spring Data JPA adds its own features like a no-code implementation of the repository pattern and the creation of database queries from method names.
+
+## Cách sử dụng Spring Data JPA 
+
+Chỉ cần một dependency với antifactid là `spring-boot-starter-data-jpa` và JDBC driver trong maven, ví dụ như
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.postgresql</groupId>
+    <artifactId>postgresql</artifactId>
+    <scope>test</scope>
+</dependency>
+```
+Tiếp theo cần config file application.properties với các thông tin về datasource
+
+```
+spring.datasource.url = jdbc:postgresql://localhost:5432/recipes
+spring.datasource.username = postgres
+spring.datasource.password = postgres
+```
+
+### Spring data Commons
+
+là một phần của Spring data, nó cung cấp (shared infrastructure) trên toàn Spring Data project. Chứa một số interface như
+- `Repository<T, ID extends Serializable> interface`: quản lí loại Entity được quản lí và loại dữ liệu của ID. Giúp Spring Container nhận biết được nó là repository trong khi classpath scanning
+- `CrudRepository<T, ID extends Serializable> interface`: cung cấp các operation thêm, xóa, sửa cho việc quản lí Entity.
+- `PagingAndSortingRepository<T, ID extends Serializable> interface`: interface cung cấp các method nhằm sử dụng để sort và paginate entities được truy vấn từ database.
+- QueryDslPredicateExecutor interface: không phải là  “repository interface”. Dùng để truy vấn các Entity từ database bằng cách sử dụng QueryDSL.
+
+### Spring Data JPA Interface
+
+Cung cấp một số interface 
+- `JpaRepository<T, ID extends Serializable> `: kết hợp các phương thức được khai báo của commoms repository bằng một interface duy nhất.
+-  `JpaSpecificationExecutor<T> `: đây là interface không phải `repository interface`, truy vấn các Entity từ database  bằng cách sử dụng Criteria API.
+
+![X](https://www.petrikainulainen.net/wp-content/uploads/springdatajrepositories.png)
 
 ## Spring JPA hỗ trợ cho ta điều gì
 
-- Reduce boilerplate code for JPA: Spring Data JPA cung cấp sẵn các implementation cho mỗi method được định nghĩa trong interface repository. Điều này có nghĩa là bạn không cần phải viết nhiều code, ít dẫn đến những sai lầm khi tương tác với database.
+- Reduce boilerplate code for JPA: Spring Data JPA cung cấp sẵn các implementation cho mỗi method được định nghĩa trong interface repository. Điều này có nghĩa là bạn không cần phải viết nhiều code khi implement các data acess layer, ít dẫn đến những sai lầm khi tương tác với database.
 
 - Support QueryDSL and JPA queries
 
 - Support for batch loading, sorting, dynamical queries
+  
 - Generated queries.
 
 ## Bootstrap mode
@@ -100,6 +148,81 @@ Ví dụ ta có một phương thức sau `List<Person> findByAddressZipCode(Zip
 
 Đầu tiên thuật toán sẽ sử dụng toàn bộ `AddressZipCode` như một thuộc tính của Entity, nếu được thì nó sẽ thực hiện, nếu lần một nó sẽ tách ra thành các phần đầu và đuôi dựa vào Camel Case, trong ví dụ của ta là `AddressZip` và `Code`, nếu vẫn tiếp tục thất bại thì nó sẽ đổi lại cách split thnahf `Address` và `ZipCode`, cứ tiếp tục như vậy.
 
+#### Returning Values From Query Methods
+
+Các câu query có thể được trả về ở các kiểu sau đây
+- Basic Type: có thể trả về các loại dữ liệu cơ bản hoặc null
+- Entity: Trả về các Entity hoặc null
+- Optional<T>: trả về Optional hoặc Empty Optional.
+
+Nếu các câu query trả về hơn một kết quả ta có thể sử dụng
+- List<T>
+- Stream<T>
+
+Sử dụng Stream để tăng tốc độ xử lí được cung cấp bằng java 8, nhưng có một số kiểu không hỗ trợ Steam.
+
+```java
+@Query("select u from User u")
+Stream<User> streamAllPaged(Pageable pageable);
+
+//---- Lưu ý khi xử lí Stream ta cần close resource sau khi sử dụng bằng cách try with resource
+
+try (Stream<User> stream = repository.findAllByCustomQueryAndStream()) {
+  stream.forEach(…);
+}
+
+```
+
+#### Passing Method Parameters to Query Methods
+
+Với các câu query được tạo từ annotation `@Query`,  ta có thể truyền vào các tham số bằng thứ vị vị trí hoặc bằng thêm các tham số được được quy định sẵn
+
+##### @Modyfi đi kèm với @Query
+
+https://www.baeldung.com/spring-data-jpa-modifying-annotation
+
+Với việc các câu lệnh update và xóa database bằng `@Query`, thì có thể xảy ra tình huống entity của chúng ta trên persistence context bị outdated (do  dưới database đã xóa mà trên persistence context vẫn còn hoặc không cập nhật theo).
+
+Do đó để khắc phục việc này thì ta có thể sử dụng `@Modifying(clearAutomatically = true)` làm cho persistence context được clear sau khi câu lệnh được thực thi.
+
+Nhưng với điều đó thì có thể xảy ra vấn đề là mất các thao tác update khác khi các thao tác đó chưa kịp persist vào BD.
+
+##### Position based parameter binding
+
+Ví dụ về truyền tham số theo thứ tự như sau
+```java
+interface TodoRepository extends Repository<Todo, Long> { 
+ 
+    public Optional<Todo> findByTitleAndDescription(String title, String description);
+     
+    @Query("SELECT t FROM Todo t where t.title = ?1 AND t.description = ?2")
+    public Optional<Todo> findByTitleAndDescription(String title, String description);
+     
+    @Query(value = "SELECT * FROM todos t where t.title = ?0 AND t.description = ?1", 
+        nativeQuery=true
+    )
+    public Optional<Todo> findByTitleAndDescription(String title, String description);
+}
+```
+
+##### named parameters
+
+```java
+interface TodoRepository extends Repository<Todo, Long> { 
+     
+    @Query("SELECT t FROM Todo t where t.title = :title AND t.description = :description")
+    public Optional<Todo> findByTitleAndDescription(@Param("title") String title, 
+                                                    @Param("description") String description);
+     
+    @Query(
+        value = "SELECT * FROM todos t where t.title = :title AND t.description = :description", 
+        nativeQuery=true
+    )
+    public Optional<Todo> findByTitleAndDescription(@Param("title") String title, 
+                                                    @Param("description") String description);
+}
+```
+
 #### Special parameter handling
 
 Spring Data Jpa còn hỗ trợ thêm các kiểu Pageable, Sort, Slice vào các câu truy vấn, ví dụ như 
@@ -137,22 +260,6 @@ Slice<User> findTop3ByLastname(String lastname, Pageable pageable);
 List<User> findFirst10ByLastname(String lastname, Sort sort);
 
 List<User> findTop10ByLastname(String lastname, Pageable pageable);
-```
-
-#### Streaming query results
-
-Sử dụng Stream để tăng tốc độ xử lí được cung cấp bằng java 8, nhưng có một số kiểu không hỗ trợ Steam.
-
-```java
-@Query("select u from User u")
-Stream<User> streamAllPaged(Pageable pageable);
-
-//---- Lưu ý khi xử lí Stream ta cần close resource sau khi sử dụng bằng cách try with resource
-
-try (Stream<User> stream = repository.findAllByCustomQueryAndStream()) {
-  stream.forEach(…);
-}
-
 ```
 
 #### Async query results

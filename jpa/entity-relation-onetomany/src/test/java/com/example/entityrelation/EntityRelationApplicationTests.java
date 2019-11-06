@@ -24,6 +24,8 @@ import java.util.List;
 		"logging.level.org.springframework.jdbc.core=DEBUG",
 		"logging.level.org.springframework.transaction=TRACE"
 })
+//@AutoConfigureJdbc
+//@AutoConfigureTestDatabase
 class EntityRelationApplicationTests {
 
 	@Autowired
