@@ -16,6 +16,7 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     Post findFirst1ByCommentsReviewContaining(String review);
     List<Post> findPostsByTitleContaining(String title, Sort sort);
 
+
     @Modifying
     @Query("update Post p set p.title = ?1 where p.id = ?2 ")
     void  updateTitlePostById(String title, Long id);
