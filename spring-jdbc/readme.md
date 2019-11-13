@@ -1,6 +1,8 @@
-# Spring-JDBC
+# JDBC
 
-- [Spring-JDBC](#spring-jdbc)
+Dưới đây trình bài về  Core của JDBC, các thao tác, các câu query để tương tác với database, quản lí transaction, và vấn đề SQL Injection.
+
+- [JDBC](#jdbc)
   - [What is JDBC? JDBC Driver?](#what-is-jdbc-jdbc-driver)
     - [What](#what)
     - [JDBC Driver](#jdbc-driver)

@@ -262,13 +262,19 @@ Mặc định khi ta làm việc với các property trên Entity, khi không c�
 
 ## Với việc cấu hình trong Database nhưng đặt tên thuộc tính trên Entity khác với database thì sẽ như thế nào?
 
-Với các Entity quy định tên table không giống với database thì Entity sẽ tạo bảng mới, với những Entity Trùng khớp tên với database thì mapping giữa enitity trùng khớp với tên table không database.
+Tùy vào cấu hình thuộc tính `spring.jpa.hibernate.ddl-auto` mà khi cấu hình trên Entity và database nó sẽ có những hành vi khác nhau.
 
-Đối với các entity trùng khớp, những thuộc tính nào trong Entity không giống, thì hibernate sẽ tạo thêm các column mới trong bảng dưới database đó.
+- create: tạo ra một schema mới, nếu có tồn tại schema trước đó cùng tên thì nó sẽ xóa cái trước đó.
+- update: nếu trong database chưa có schema đó thì nó sẽ tạo schema mới. Nếu đã tồn tại trước đó thì với các thuộc tính khác với database, nó sẽ thay đổi các thuộc tính đó trùng với trên entity, cùng với các khóa chính và các khoá ngoại.
+- validate: kiểm tra mapping giữa entity và schema dưới database có giống hay không, nếu không giống thì throw ra error  .
+- create-drop: tương tự như create, nhưng sau khi SessionFactory bị đóng thì nó sẽ xóa database schema.
+- với trường hợp mặc định: nếu chưa có schema thì nó sẽ tạo ra schema mới, nhưng nếu đã có trong database thì nó sẽ update schema đó.
 
-Và bên cạnh đó, hibernate sẽ update lại các primary key trên các entity đã mapping trùng khớp với table trong database. Nhưng dễ gây ra lỗi vì mapping không đồng nhất giữa các Entity với table trong database về các khóa chính và khóa ngoại.
 
 ## Tài liệu tham khảo
+
+https://stackoverflow.com/questions/438146/
+what-are-the-possible-values-of-the-hibernate-hbm2ddl-auto-configuration-and-wha
 
 https://www.baeldung.com/jpa-one-to-one
 

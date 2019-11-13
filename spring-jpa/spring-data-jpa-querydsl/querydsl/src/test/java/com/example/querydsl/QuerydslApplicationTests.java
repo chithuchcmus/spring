@@ -44,20 +44,65 @@ class QuerydslApplicationTests {
 	}
 
 	@Test
-	void test_findPostHaveMoreThanOneCommentByQueryDsl()
+	void test_findListCommentByQuery()
 	{
 		//GIVE
 		postService.savePost(initPostWithOneComment("1"));
 		postService.savePost(initPostWithTwoComment("2"));
 		postService.savePost(initPostWithTwoComment("2"));
+
+		//When
+		List<PostComment> commentList = postService.findListPostByQuery();
+
+		//then
+		Assert.assertEquals("5",commentList.size());
+	}
+
+	@Test
+	void test_findPostHaveMoreThanOneCommentByQueryDsl()
+	{
+		//GIVE
+		postService.savePost(initPostWithOneComment("1"));
+		postService.savePost(initPostWithTwoComment("2"));
+		postService.savePost(initPostWithTwoComment("3"));
 		//WHEN
 		List<Post> posts = postService.findPostHaveMoveThanOneComment();
 		//Then
 		Assert.assertEquals(2,posts.size());
 	}
 
+	@Test
+	void test_countPostHaveLessThanTwoComments()
+	{
+		//GIVE
+		postService.savePost(initPostWithOneComment("1"));
+		postService.savePost(initPostWithTwoComment("2"));
+		postService.savePost(initPostWithTwoComment("3"));
+		postService.savePost(initPostWithZeroComment("4"));
+		//WHEN
+		Integer numberPost = postService.countPostHaveLessThanTwoComments();
+		//Then
+		Assert.assertEquals("2",numberPost.toString());
+	}
 
+	@Test
+	void test_findListCommentsWithPostIdGreaterThanOne()
+	{
+		//GIVE
+		postService.savePost(initPostWithOneComment("1"));
+		postService.savePost(initPostWithTwoComment("2"));
+		postService.savePost(initPostWithTwoComment("3"));
+		//WHEN
+		List<PostComment> postComments = postService.findAllPostComments();
+		//Then
+		Assert.assertEquals(2,postComments.size());
+	}
 
+	public Post initPostWithZeroComment(String id) {
+		Post post = new Post();
+		post.setTitle("new post " + id);
+		return post;
+	}
 	public Post initPostWithOneComment(String id) {
 		Post post = new Post();
 		post.setTitle("new post " + id);

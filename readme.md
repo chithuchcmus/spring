@@ -1,14 +1,16 @@
-# Hello this is my project research Spring.
+# SPring
+
+Project research about spring include spring boot, spring core, spring data jpa, spring Jdbc, spring transaction management.
 
 ## Spring Core Demo
 
-report about spring core [here](./spring-core/spring-core-report.md)
+report about spring core [here](./spring-core/readme.md)
 
 code demo in folder `spring-core`
 
 ## Spring Boot Demo
 
-report about spring boot test  [here](./spring-jdbc/spring-jdbc-report.md)
+report about spring boot test  [here](./spring-jdbc/readme.md)
 
 code demo in folder `spring-jdbc`
 
@@ -20,7 +22,7 @@ code demo in folder `spring-jdbc`
 
 ## Spring Transactional management
 
-report about transactional management [here](./transactional-management/transaction-management.md)
+report about transactional management [here](./transactional-management/readme.md)
 
 code demo in folder `spring-transactional-management`: unit test about @Transactional: Require, Require New, Read-only
 

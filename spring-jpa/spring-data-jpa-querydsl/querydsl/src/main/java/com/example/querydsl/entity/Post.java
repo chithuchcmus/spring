@@ -22,9 +22,7 @@ public class Post {
     private List<PostComment> comments = new ArrayList<>();
 
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="user_id")
-    private User user;
+
     //Constructors, getters and setters removed for brevity
     public Post() {
 
