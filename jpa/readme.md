@@ -1,3 +1,26 @@
+- [JPA](#jpa)
+  - [What is JPA](#what-is-jpa)
+  - [JPA - Architecture](#jpa---architecture)
+  - [JPA - ORM Components](#jpa---orm-components)
+  - [JPA Entity](#jpa-entity)
+    - [JPA Entity LifeCycle](#jpa-entity-lifecycle)
+    - [persistence Context](#persistence-context)
+    - [Retireving Jpa Entity Object](#retireving-jpa-entity-object)
+    - [Retrieval by Class and Primary Key](#retrieval-by-class-and-primary-key)
+    - [Retrieval by Eager Fetch](#retrieval-by-eager-fetch)
+  - [JPA Entity Manager](#jpa-entity-manager)
+  - [JPA Cascade Types](#jpa-cascade-types)
+  - [Generated Identifiers](#generated-identifiers)
+    - [AUTO Generation](#auto-generation)
+    - [IDENTITY](#identity)
+    - [SEQUENCE Generation](#sequence-generation)
+  - [JPA - JPQL](#jpa---jpql)
+  - [JPA - Advanced Mapping](#jpa---advanced-mapping)
+  - [JPA - Criteria API](#jpa---criteria-api)
+  - [JPA - Transaction](#jpa---transaction)
+  - [Hibernate as JPA Provider nghĩa là thế nào](#hibernate-as-jpa-provider-ngh%c4%a9a-l%c3%a0-th%e1%ba%bf-n%c3%a0o)
+  - [Hibernate](#hibernate)
+
 # JPA
 
 Sử dụng JPA để giảm các thao tác với DB, là cầu nối giữa các Object trong chương trình với relational models. Thông thường thì giữa hai định dạng đó có một số điểm khác nhau nhất định như relation model được trình bày theo dạng bảng, còn object được trình bày dưới dạng các thuộc tính kết nối với nhau nên việc liên kết giữa chúng là không đơn giản.

@@ -262,19 +262,16 @@ Mặc định khi ta làm việc với các property trên Entity, khi không c�
 
 ## Với việc cấu hình trong Database nhưng đặt tên thuộc tính trên Entity khác với database thì sẽ như thế nào?
 
-Tùy vào cấu hình thuộc tính `spring.jpa.hibernate.ddl-auto` mà khi cấu hình trên Entity và database nó sẽ có những hành vi khác nhau.
-
-- create: tạo ra một schema mới, nếu có tồn tại schema trước đó cùng tên thì nó sẽ xóa cái trước đó.
-- update: nếu trong database chưa có schema đó thì nó sẽ tạo schema mới. Nếu đã tồn tại trước đó thì với các thuộc tính khác với database, nó sẽ thay đổi các thuộc tính đó trùng với trên entity, cùng với các khóa chính và các khoá ngoại.
-- validate: kiểm tra mapping giữa entity và schema dưới database có giống hay không, nếu không giống thì throw ra error  .
-- create-drop: tương tự như create, nhưng sau khi SessionFactory bị đóng thì nó sẽ xóa database schema.
-- với trường hợp mặc định: nếu chưa có schema thì nó sẽ tạo ra schema mới, nhưng nếu đã có trong database thì nó sẽ update schema đó.
-
+Tùy thuộc vào thuộc tính `hibernate.ddl-auto`  cấu hình trên application.properties mà khi đó, Entity manager và Schema trong database sẽ có những hành vi khác nhau
+- create: tạo ra schema database mới mà không cần quan tâm trước đó đã có hay chưa, nếu có sẽ bị đè lên, xóa mất cái cũ
+- create-drop: tương tự như create, nhưng sau khi thực hiện xong, lúc SessionFactory đóng thì xóa hết schema đã tạo trong database.
+- update: nếu có sự khác biệt giữa việc cấu hình schema trong database và Entity thì nó sẽ chỉnh sửa các cấu hình trong database nếu cùng tên và thêm các thuộc tính mới nếu chưa có trong đó.
+- validate: kiểm tra mapping schema giữa database và schema, nếu có sự khác biệt sẽ throw ra một error  
+- default: không làm gì cả
 
 ## Tài liệu tham khảo
 
-https://stackoverflow.com/questions/438146/
-what-are-the-possible-values-of-the-hibernate-hbm2ddl-auto-configuration-and-wha
+https://stackoverflow.com/questions/438146/what-are-the-possible-values-of-the-hibernate-hbm2ddl-auto-configuration-and-wha
 
 https://www.baeldung.com/jpa-one-to-one
 
