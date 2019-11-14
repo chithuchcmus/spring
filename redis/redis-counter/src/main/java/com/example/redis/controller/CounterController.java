@@ -1,7 +1,8 @@
 package com.example.redis.controller;
 
-import com.example.redis.repository.CounterRepository;
-import com.example.redis.service.CounterService;
+import com.example.redis.service.CounterCorrectService;
+import com.example.redis.service.CounterCorrectServiceImpl;
+import com.example.redis.service.CounterInCorrectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,21 +13,25 @@ import org.springframework.web.bind.annotation.RestController;
 public class CounterController {
 
     @Autowired
-    private CounterService counterService;
+    private CounterCorrectService counterCorrectService;
 
+
+    @Autowired
+    private CounterInCorrectService counterInCorrectService;
 
     @GetMapping(path = "/ping")
     @Transactional
     public String pingApi()
     {
-        System.out.println(counterService.count());
+        System.out.println(counterCorrectService.count());
         return "ping";
     }
 
-    @PostMapping(path = "/update")
+    @GetMapping(path = "/wrong-ping")
     @Transactional
-    public String update()
+    public String inCorrectPingApi()
     {
+        System.out.println(counterInCorrectService.count());
         return "ping";
     }
 }

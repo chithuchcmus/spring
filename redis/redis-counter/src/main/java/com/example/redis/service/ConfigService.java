@@ -4,7 +4,7 @@ package com.example.redis.service;
 import org.springframework.stereotype.Component;
 
 @Component
-public class HelperConfigService {
+public class ConfigService {
     private  final String redisServerAddress = "127.0.0.1:6379";
 
     private  final long valueStart = 0L;

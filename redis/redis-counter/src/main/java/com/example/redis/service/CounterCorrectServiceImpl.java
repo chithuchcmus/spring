@@ -14,18 +14,18 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.PostConstruct;
 
 @Service
-public class CounterService {
+public class CounterCorrectServiceImpl implements CounterCorrectService{
 
     private RedissonClient redissonClient;
     private RAtomicLong counterInRedis;
 
     @Autowired
-    private HelperConfigService helperConfigService;
+    private ConfigService configService;
 
     @Autowired
     private CounterRepository counterRepository;
 
-    public CounterService()
+    public CounterCorrectServiceImpl()
     {
     }
 
@@ -34,25 +34,29 @@ public class CounterService {
     {
         Config config = new Config();
         config.useSingleServer()
-                .setAddress(helperConfigService.getRedisServerAddress());
+                .setAddress(configService.getRedisServerAddress());
         redissonClient = Redisson.create(config);
         counterInRedis =  redissonClient.getAtomicLong("counter");
-        counterInRedis.set(helperConfigService.getStartCountValue());
+        counterInRedis.set(configService.getStartCountValue());
 
         Counter counterEntity = new Counter();
-        counterEntity.setNumberCount(helperConfigService.getStartCountValue());
+        counterEntity.setNumberCount(configService.getStartCountValue());
         counterRepository.save(counterEntity);
+
+
     }
 
+    @Override
     @Scheduled(fixedDelay = 1000)
     @Transactional
     public void startLoopPersistCounter()
     {
-        Counter counterEntity = counterRepository.findCounterById(helperConfigService.getCountIdInDB());
+        Counter counterEntity = counterRepository.findCounterById(configService.getCountIdInDB());
         counterEntity.setNumberCount(counterInRedis.get());
         counterRepository.save(counterEntity);
     }
 
+    @Override
     public long count()
     {
         return counterInRedis.incrementAndGet();
