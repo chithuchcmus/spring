@@ -1,0 +1,213 @@
+# Redis
+
+## What is redis?
+
+Redis được xem như là  data structures server bằng cách cung cấp nhiều lọai data structure thông qua các câu lệnh command. các câu lệnh command được gửi và nhận thông qua TCP socket với redis server, do đó với nhiều process khác nhau có thể cùng tương tác vào cùng một data structure.
+
+Có một số  đặc điểm đặc biệt của redis như sau
+- Redis quan tâm đến vấn đề lưu trữ dữ liệu trên đĩa, mặc dù bình thường chúng được sử dụng và update dữ liệu trên bộ nhớ, do đó Redis không những nhanh mà ta còn không cần lo lắng đến vấn đề mất dữ liệu khi tắt chương trình.
+- data structure trên redis được tối ưu sử dụng ít bộ nhớ hơn các data structure được sử dụng trên các ngôn ngữ lập trình thông thường
+- có một số feature đặc biệt như replication,  tunable levels of durability, cluster, high availability.
+
+Redis được biết đến nhiều nhất vào việc được sử dụng như một memcache bằng cách thực hiện các thao tác GETS, SETS.
+
+## What is redis data types? How to use it?
+
+Redis có 5 cấu trúc dữ liệu chính là String, Hash, List, Sets, Sorted Set, HyperLoglog
+
+### List
+
+Redis list là danh sách các chuỗi được sắp xếp theo thứ tự truyền vào, có thể thêm vào đầu bằng LPUSH hoặc vào cuối bằng RPUSH. tương tự như vậy ta cũng có thể lấy các phần tử hoặc cập nhật các phần tử trong List.
+Redis Lists là danh sách của các chuỗi, Sắp xếp theo thứ tự chèn vào. Bạn có thể thêm element tới một List Redis vào đầu hoặc vào cuối. Chiều dài tối đa của một list  là hơn 4 tỉ của các element/list, các thao các thêm hoặc xóa các element cuối hoặc đầu list với độ phức tạp hằng số. Các thao tác ở giữa list (với list nhiều phần tử) thì chi phí tương đương O(n)
+Các câu lệnh đã sử dụng:
+
+
+```sh
+127.0.0.1:6379> LPUSH fresher chithuc
+(integer) 1
+127.0.0.1:6379> LPUSH fresher 21
+(integer) 2
+127.0.0.1:6379> LPUSH fresher VNG
+(integer) 3
+127.0.0.1:6379> LRANGE fresher 0 2
+1) "VNG"
+2) "21"
+3) "chithuc"
+```
+
+### Sets
+
+Redis Sets là một tập có thứ tự của các chuỗi, bạn có thể thêm, xóa, kiểm tra sự tồn tại của chuỗi trong sets với độ phức tạp O(1). CÁc giá trị trong set không có trùng lặp. Số lượng lớn nhất của member trong set là 2^32 – 1 (hơn 4 tỉ member/set). Dùng lệnh sadd để thêm giá trị vào Sets, và smembers để kiểm tra tất cả các giá trị có trong Sets đó.
+Câu lệnh đã sử dụng:
+
+SADD: key value1: thêm các giá trị value vào tập hợp
+
+SMEMBERS: lấy các phần tử trong tập hợp.
+
+```sh
+127.0.0.1:6379> SADD fresher thuc
+(integer) 1
+127.0.0.1:6379> SADD fresher 21 vng
+(integer) 2
+127.0.0.1:6379> SMEMBERS fresher
+1) "21"
+2) "thuc"
+3) "vng"
+```
+
+### Hashes
+
+Redis hash là lệnh sử dụng để quản lý các key/value trong đó value có giá trị là hash.  vì thế chúng là kiểu dữ liệu hoàn hảo tới các object.Trong redis mổi hash có thể lưu trử tới hơn 4 tỷ cặp field-value.
+Câu lệnh sử dụng:
+
+
+HMSET key field value: đặt giá trị cho field là value trong hash
+
+```sh
+HGET key field: lấy giá trị field trong hash.
+127.0.0.1:6379> HMSET user:1 ten "thuc" tuoi "21"
+OK
+127.0.0.1:6379> HGET user:1 ten
+"thuc"
+127.0.0.1:6379> HGET user:1 tuoi
+"21"
+```
+
+### Sorted set
+
+Kiểu dữ liệu tương tự như Redis Sets, không lặp lại giá trị. Điểm khác biệt ở đây là Sorted Set mỗi giá trị liên kết với một số được xem là độ ưu tiên của số đó  (có thể lặp lai), điểm số này là cơ sở cho viêc tạo ra Sorted Sets có thứ tự. Với sorted set ta có thể thêm, xóa, kiểm tra tồn tại các phần tử trong set với tốc độ rất nhanh, kể cả phần tử giữa set.
+Các câu lệnh cơ bản:
+
+
+ZADD key scroce1 value1 score2 value2: thêm các phần tử vào sorted set với độ uư tiên theo scroce
+
+```sh
+ZRANGE:  lấy các phần tử trong tập hợp từ start đến stop theo giá trị score của chúng.
+127.0.0.1:6379> ZADD fresher 1 value1
+(integer) 1
+127.0.0.1:6379> ZADD fresher 2 value2
+(integer) 1
+127.0.0.1:6379> ZADD fresher 5 value5
+(integer) 1
+127.0.0.1:6379> ZADD fresher 3 value3
+(integer) 1
+127.0.0.1:6379> ZRANGE fresher 0 3 WITHSCORES
+1) "value1"
+2) "1"
+3) "value2"
+4) "2"
+5) "value3"
+6) "3"
+7) "value5"
+8) "5"
+```
+
+### HyperLogLogs
+
+Là cấu trúc dữ liệu để đếm các phần tử phân biệt trong tập dữ liệu lớn, với hyperloglog kể cả cho số lượng phầ tử ngày càng lớn đi nữa thì ta vẫn không cần tăng lượng bộ nhớ sử dụng, đánh đổi lại thì tỉ lệ chính xác của hyperloglog chỉ đạt 99%.
+
+Dưới đây là các câu lệnh được sử dụng với hyperloglog
+- pfadd: thêm phần tử mới vào hyperloglog
+- pfcount: đếm các phần tử phân biệt có trong tập hyperloglog
+
+```sh
+> pfadd hll a b c d
+(integer) 1
+> pfcount hll
+(integer) 4
+```
+## How to use distributed lock with redis?
+
+### vì sao cần thuật toán redlock
+
+Trong trường hợp thông thường, redis tạo một key để giữ lock đó với limit time live, và khi release thì redis sẽ xóa key đó.
+
+Vấn đề như sau: có một node bị fail dẫn đến master down -> sẽ tìm kiếm slave thay thế lên làm master. Nhưng sẽ có vấn đề sau vì  Redis replication is asynchronous.
+- Client A yêu cầu lock trên master
+- master lúc này bị crash và chuyển slave lên làm master nhưng chưa kịp chuyển thông tin là client A đã xin được lock
+- Client B yêu cầu lock trên cùng resource với client A, nhưng lúc này master mới đã mất thông tin, nên vẫn cung cấp lock cho B -> lỗi.
+
+### Thuật toán redlock
+
+Để tránh lỗi trên thì redis sử dụng một instance cho các node, và tránh trường hợp client này remove lock được yêu cầu bởi client khác, để làm điều đó thì
+- giả sử có N node, ta bắt đầu đếm thời gian hiện tại, đến từng node để xin key, với thời gian giới hạn ở từng node
+- nếu xin được số key là trên (n+1)/2 cùng với thời gian đi xin nhỏ hơn thời gian expire thì xin key thành công, còn không là thất bại. Thời gian để tương tác với resource = thời gian expire - thời gian xin lock.
+- Nếu thất bại thì sau một khoảng thời gian mới xin lại.
+
+### How to use distributed lock redis java
+
+https://dzone.com/articles/distributed-java-locks-with-redis
+
+## What is redis persistance? How many modes? Advantages & disadvantages of theses?
+
+Các thao tác trên redis chủ yếu là trên bộ nhớ, do đó cần phải có những biện pháp để tránh mất dữ liệu khi tắt chương trình, server bị tắt.
+
+### RDB persistence
+
+sau mỗi khoảng thời gian thì nó sẽ snapshot lại dataset của mình lại
+
+Lợi ịch
+- là một file nhỏ gọn tại mỗi thời điểm là nó lưu lại, dễ dàng tải hoặc truyền đến các máy chủ khác nhau.
+- quá trình khởi động, load lại từ file RDB nhanh hơn AOF rất nhiều 
+
+Nhược điểm
+- không tốt trong trường hợp muốn hạn chế mất ít nhất dữ liệu nếu có thể , khi redis server bị donw thì ta có thể mất dữ liệu ở những thao tác cuối
+- cần sử dụng các tiến trình con để lưu xuống đĩa, mất nhiều thời gian nếu tập dữ liệu lớn và CPU không đủ tốt
+
+### AOF persistence
+
+Ghi log lại tất cả các operation đã thực hiện trên dataset, và khởi động chạy lại khi server restart. và khi log quá lớn thì redis sẽ rewrite log.
+
+Ưu điểm
+- Ít mất dữ liệu hơn, đảm bảo các thao tác trên DB được lưu lại
+- redis sẽ tự động rewrite AOF dưới background nếu nó đã quá nhiều, nó hoàn toàn an toàn, trong khi redis tiếp tục thêm vào các operation trong file cũ thì file mới được tạo với tập các operation cần thiết để tạo ra dataset tối thiểu, và một khi file mới đã sẵn sàng thì nó sẽ chuyển sang sử dụng tiếp tục file mới
+- chứa tất cả các operation nên dễ hiểu và format
+
+Nhược điểm
+- AOF có độ lớn lớn hơn RDB rất nhiều
+- tốc độ load dữ liệu lên của AOF chậm hơn RDB rất nhiều
+
+## How to configure redis?
+
+Để config redis cache với độ lớn của cache và policy thay thế cache 
+
+```sh
+maxmemory 2mb
+maxmemory-policy allkeys-lru
+```
+
+để set key expire ta dùng lệnh EXPIRE
+
+```sh
+redis> SET mykey "Hello"
+"OK"
+redis> EXPIRE mykey 10
+(integer) 1
+```
+
+Với các redis-server đang chạy, ta cũng có thể reconfig bằng cách sử dụng câu lệnh `CONFIG SET `, hiệu lực câu lệnh sẽ được thực thi ngay lập tức và áp dụng cho các câu lệnh tiếp theo.
+
+Ví dụ như sau `CONFIG SET SAVE "900 1 300 10"` với câu lệnh trên thì sẽ thay đổi policy persistence từ lưu sau 900 giây sau khi có một câu lệnh thành lưu sau 300 giây sau khi có 10 câu lệnh được thực thi. Hầu hết các cấu hình cần thiết trong file redis.conf đều được hỗ trợ bởi CONFIG SET. Để lấy ra thông tin hiện tại ta có thể sử dụng câu lệnh `CONFIG GET`
+
+## How to optimize memory?
+
+Using 32 bit instances: sử dụng key 32 bit để tiết kiệm nhiều bộ nhớ hơn cho mỗi key vì giá trị con trỏ để lưu trữ tốn ít bộ nhớ hơn.
+
+Bit and byte level operations: 
+
+Use hashes when possible: sử dụng hash nhiều nhất nếu có thể vì hash tốn rất ít bộ nhớ, và mới mỗi key có thể lưu được nhiều field và value trên key đó.
+
+Using hashes to abstract a very memory efficient plain key-value store on top of Redis: Thay vì sử dụng nhiều key cho nhiều cặp giá trị thì ta có thể sử dụng một key cho nhiều cặp khóa giá trị. Với điều này thì cache locality sẽ tốt hơn rất nhiều nhưng cùng thời gian thao tác khi số cặp khóa giá trị không lớn, nó còn có thể đại diện cho các object hoặc model trên các ứng dụng.
+
+Memory allocation: redis cho phép cấu hình max memory để cache (nhưng cũng có giới hạn nhỏ nhất). có một số điều cơ bản về Redis manage memory
+- redis không phải luôn luôn free memory khi key bị removed. do đó cần để ý đến việc là khi ta cần sử dụng bộ nhớ như nào cho hợp lí. ví dụ trong chương trình ta có lần sử dụng 10GB nhưng hầu hết chương trình của mình chỉ sử dụng 5GB nhưng phía dưới ta vẫn phải cung cấp 10GB bộ nhớ để sử dụng.
+- Nhưng với những bộ nhớ bạn đã free trước đó, khi thêm các key vào, nó sẽ tái sử dụng bộ nhớ đã được free chứ không cấp phát thêm nữa
+- Do đó the fragmentation ratio  có vẻ phản ánh đúng sự thật trong bộ nhớ như thế nào. có TH là RSS ( physical memory actually used) / mem_used(current) quá cao nhưng mem_used lại quá thấp. 
+
+Vì vậy ta cần phải cấu hình maxmemory để không là redis sẽ cảm thấy khi cần thiết nó sẽ cấp phát bộ nhớ nhiều nhưng lại không thể free được (với trường hơp này ít xảy ra thì sẽ dẫn đến bộ nhớ sẽ bị chiếm hết).
+
+## What will happen when Redis reaches its memory limit?
+
+ when it reaches the limit - which in turn may result in errors in the application but will not render the whole machine dead because of memory starvation.
+ 
+Có thể dẫn đến error trong application nhưng sẽ không làm chết hết các node chỉ vì thiếu bộ nhớ.
