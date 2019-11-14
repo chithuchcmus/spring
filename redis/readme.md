@@ -164,7 +164,7 @@ Ghi log lại tất cả các operation đã thực hiện trên dataset, và kh
 - chứa tất cả các operation nên dễ hiểu và format
 
 Nhược điểm
-- AOF có độ lớn lớn hơn RDB rất nhiều
+- AOF có độ lớn, lớn hơn RDB rất nhiều
 - tốc độ load dữ liệu lên của AOF chậm hơn RDB rất nhiều
 
 ## How to configure redis?
@@ -205,6 +205,13 @@ Memory allocation: redis cho phép cấu hình max memory để cache (nhưng c�
 - Do đó the fragmentation ratio  có vẻ phản ánh đúng sự thật trong bộ nhớ như thế nào. có TH là RSS ( physical memory actually used) / mem_used(current) quá cao nhưng mem_used lại quá thấp. 
 
 Vì vậy ta cần phải cấu hình maxmemory để không là redis sẽ cảm thấy khi cần thiết nó sẽ cấp phát bộ nhớ nhiều nhưng lại không thể free được (với trường hơp này ít xảy ra thì sẽ dẫn đến bộ nhớ sẽ bị chiếm hết).
+
+Use integer IDs: sử dụng id là integer thay vì các kiểu dữ liệu khác sẽ dẫn đến tiết kiệm bộ nhớ rất nhiều
+
+Với bộ dữ liệu lớn(hơn 50000 dòng) thay vì sử  dụng hash ta có thể sử dụng list. Ví dụ thông thường ta lưu như sau: `hmset user:123 id 123 firstname Sripathi lastname Krishnan location Mumbai twitter srithedabbler` thì nó sẽ lưu trữ các cặp giá trị theo dạng như sau `["firstname", "Sripathi", "lastname", "Krishnan", "location", "Mumbai", "twitter", "srithedabbler"]`.
+Với nhiều user thì các tên cột sẽ bị duplicate mặc dù hash tốn ít bộ nhớ để lưu nhưng với bộ dữ liệu lớn thì như vậy sẽ không tốt.
+
+Thay vào đó ta sử dụng list với á hiệu là các cột sẽ tương đương với trị trí theo thứ tự `"firstname" => 0, "lastname" => 1` ví dụ như `lpush user:123 Sripathi Krishnan Mumbai srithedabbler` sẽ giúp ta tiết kiệm nhiều chi phí.
 
 ## What will happen when Redis reaches its memory limit?
 
