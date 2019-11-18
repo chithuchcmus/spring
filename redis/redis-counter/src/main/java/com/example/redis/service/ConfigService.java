@@ -1,25 +1,16 @@
 package com.example.redis.service;
 
 
-import org.springframework.stereotype.Component;
-
-@Component
 public class ConfigService {
-    private  final String redisServerAddress = "127.0.0.1:6379";
-
-    private  final long valueStart = 0L;
-    private final Integer CountInDB = 1;
-
-    public  String getRedisServerAddress() {
-        return redisServerAddress;
-    }
+    private static final Long valueStart = 0L;
+    private static final Long COUNTER_CORRECT = 1l;
 
 
-    public  long getStartCountValue() {
+    public static Long getStartCountValue() {
         return valueStart;
     }
 
-    public Integer getCountIdInDB() {
-        return CountInDB;
+    public static Long getCounter() {
+        return COUNTER_CORRECT;
     }
 }

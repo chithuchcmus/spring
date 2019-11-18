@@ -191,22 +191,33 @@ Ví dụ như sau `CONFIG SET SAVE "900 1 300 10"` với câu lệnh trên thì 
 
 ## How to optimize memory?
 
-Using 32 bit instances: sử dụng key 32 bit để tiết kiệm nhiều bộ nhớ hơn cho mỗi key vì giá trị con trỏ để lưu trữ tốn ít bộ nhớ hơn.
+`Using 32 bit instances`: sử dụng key 32 bit để tiết kiệm nhiều bộ nhớ hơn cho mỗi key vì giá trị con trỏ để lưu trữ tốn ít bộ nhớ hơn.
 
-Bit and byte level operations: 
+`Special encoding of small aggregate data types`: cấu hình maximum number of elements and maximum element, để khi các phần tử nằm trong khoảng cấu hình này thì bộ nhớ sẽ được optimize nhiều hơn (10 lần so với 5 lần lúc bình thường). ví dụ cấu hình trong file redis.conf
+```sh
+hash-max-zipmap-entries 512 (hash-max-ziplist-entries for Redis >= 2.6)
+hash-max-zipmap-value 64  (hash-max-ziplist-value for Redis >= 2.6)
+list-max-ziplist-entries 512
+list-max-ziplist-value 64
+zset-max-ziplist-entries 128
+zset-max-ziplist-value 64
+set-max-intset-entries 512
+```
 
-Use hashes when possible: sử dụng hash nhiều nhất nếu có thể vì hash tốn rất ít bộ nhớ, và mới mỗi key có thể lưu được nhiều field và value trên key đó.
+`Bit and byte level operations`: 
 
-Using hashes to abstract a very memory efficient plain key-value store on top of Redis: Thay vì sử dụng nhiều key cho nhiều cặp giá trị thì ta có thể sử dụng một key cho nhiều cặp khóa giá trị. Với điều này thì cache locality sẽ tốt hơn rất nhiều nhưng cùng thời gian thao tác khi số cặp khóa giá trị không lớn, nó còn có thể đại diện cho các object hoặc model trên các ứng dụng.
+`Use hashes when possible`: sử dụng hash nhiều nhất nếu có thể vì hash tốn rất ít bộ nhớ, và mới mỗi key có thể lưu được nhiều field và value trên key đó.
 
-Memory allocation: redis cho phép cấu hình max memory để cache (nhưng cũng có giới hạn nhỏ nhất). có một số điều cơ bản về Redis manage memory
+`Using hashes to abstract a very memory efficient plain key-value store on top of Redis`: Thay vì sử dụng nhiều key cho nhiều cặp giá trị thì ta có thể sử dụng một key cho nhiều cặp khóa giá trị. Với điều này thì cache locality sẽ tốt hơn rất nhiều nhưng cùng thời gian thao tác khi số cặp khóa giá trị không lớn, nó còn có thể đại diện cho các object hoặc model trên các ứng dụng.
+
+`Memory allocation`: redis cho phép cấu hình max memory để cache (nhưng cũng có giới hạn nhỏ nhất). có một số điều cơ bản về Redis manage memory
 - redis không phải luôn luôn free memory khi key bị removed. do đó cần để ý đến việc là khi ta cần sử dụng bộ nhớ như nào cho hợp lí. ví dụ trong chương trình ta có lần sử dụng 10GB nhưng hầu hết chương trình của mình chỉ sử dụng 5GB nhưng phía dưới ta vẫn phải cung cấp 10GB bộ nhớ để sử dụng.
 - Nhưng với những bộ nhớ bạn đã free trước đó, khi thêm các key vào, nó sẽ tái sử dụng bộ nhớ đã được free chứ không cấp phát thêm nữa
 - Do đó the fragmentation ratio  có vẻ phản ánh đúng sự thật trong bộ nhớ như thế nào. có TH là RSS ( physical memory actually used) / mem_used(current) quá cao nhưng mem_used lại quá thấp. 
 
 Vì vậy ta cần phải cấu hình maxmemory để không là redis sẽ cảm thấy khi cần thiết nó sẽ cấp phát bộ nhớ nhiều nhưng lại không thể free được (với trường hơp này ít xảy ra thì sẽ dẫn đến bộ nhớ sẽ bị chiếm hết).
 
-Use integer IDs: sử dụng id là integer thay vì các kiểu dữ liệu khác sẽ dẫn đến tiết kiệm bộ nhớ rất nhiều
+`Use integer IDs`: sử dụng id là integer thay vì các kiểu dữ liệu khác sẽ dẫn đến tiết kiệm bộ nhớ rất nhiều
 
 Với bộ dữ liệu lớn(hơn 50000 dòng) thay vì sử  dụng hash ta có thể sử dụng list. Ví dụ thông thường ta lưu như sau: `hmset user:123 id 123 firstname Sripathi lastname Krishnan location Mumbai twitter srithedabbler` thì nó sẽ lưu trữ các cặp giá trị theo dạng như sau `["firstname", "Sripathi", "lastname", "Krishnan", "location", "Mumbai", "twitter", "srithedabbler"]`.
 Với nhiều user thì các tên cột sẽ bị duplicate mặc dù hash tốn ít bộ nhớ để lưu nhưng với bộ dữ liệu lớn thì như vậy sẽ không tốt.
@@ -218,3 +229,87 @@ Thay vào đó ta sử dụng list với á hiệu là các cột sẽ tương �
  when it reaches the limit - which in turn may result in errors in the application but will not render the whole machine dead because of memory starvation.
  
 Có thể dẫn đến error trong application nhưng sẽ không làm chết hết các node chỉ vì thiếu bộ nhớ.
+
+## Sring boot redis starter
+
+### Dependency
+
+```xml
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+```
+
+nó chứa các dependency con như spring-data-redis, reids-driver là lecctuce và spring-boot-starter
+
+### Jedis and Lettuces
+
+Redis và Lettuce đều là driver để sử dụng redis trong gói  spring-boot-starter-data-redis   .
+- Jedis: không đảm bảo thread-safe khi application muốn dùng một instance cho nhiều thread, để đảm bảo thì Jedis tiếp cận với hướng là connection pool, mỗi thead sử  dụng một instance của jedis, làm tăng chi phí kết nối với redis server.
+- Còn đối với lettuce thì có thể sử dụng một instance cho môi trường multi thread, do đó chỉ cần một instance lettuce kết nối với redis server ta cũng có thể đảm bảo thread-safe. Do đó redis sử dụng lettuce làm default driver để kết nối với redis.
+
+Mặc định trong spring-boot-starter-data-redis sử dụng lecctuce làm driver default, và để cấu hình lecctuce thì ta sử dụng các thuộc tính trong application.properties
+
+```java
+spring.redis.lettuce.pool.max-active=7 
+spring.redis.lettuce.pool.max-idle=7
+spring.redis.lettuce.pool.min-idle=2
+spring.redis.lettuce.pool.max-wait=-1ms  
+spring.redis.lettuce.shutdown-timeout=200ms
+```
+
+để có thể sử dụng jedis ta cấu hình trong dependency nnhuw sau
+```xml
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-data-redis</artifactId>
+  <exclusions>
+    <exclusion>
+	 <groupId>io.lettuce</groupId>
+	 <artifactId>lettuce-core</artifactId>
+    </exclusion>
+  </exclusions>		    
+</dependency>		
+<dependency>
+  <groupId>redis.clients</groupId>
+  <artifactId>jedis</artifactId>
+</dependency>
+```
+
+và cấu hình trên properties các thuộc tính của jedis
+```java
+spring.redis.jedis.pool.max-active=7 
+spring.redis.jedis.pool.max-idle=7
+spring.redis.jedis.pool.min-idle=2
+spring.redis.jedis.pool.max-wait=-1ms 
+```
+
+### Config
+
+Trong application-properties thì ta có thể cấu hình redis thông qua `spring.redis.*` để cấu hình port, server, max-connect, time-live,...
+
+```sh
+spring.redis.database=0 # Database index used by the connection factory.
+spring.redis.host=localhost # Redis server host.
+spring.redis.password= # Login password of the redis server.
+spring.redis.pool.max-active=8 # Max number of connections that can be allocated by the pool at a given time. Use a negative value for no limit.
+spring.redis.pool.max-idle=8 # Max number of "idle" connections in the pool. Use a negative value to indicate an unlimited number of idle connections.
+spring.redis.pool.max-wait=-1 # Maximum amount of time (in milliseconds) a connection allocation should block before throwing an exception when the pool is exhausted. Use a negative value to block indefinitely.
+spring.redis.pool.min-idle=0 # Target for the minimum number of idle connections to maintain in the pool. This setting only has an effect if it is positive.
+spring.redis.port=6379 # Redis server port.
+spring.redis.sentinel.master= # Name of Redis server.
+spring.redis.sentinel.nodes= # Comma-separated list of host:port pairs.
+spring.redis.timeout=0 # Connection timeout in milliseconds. 
+```
+
+### Spring boot starter redis cache
+
+Ta sử dụng `@EnableCaching` để có thể sử  dụng redis như bộ nhớ cache trong controller
+
+## Refference
+
+https://github.com/spring-projects/spring-session/issues/789
+
+https://www.journaldev.com/18141/spring-boot-redis-cache
+
