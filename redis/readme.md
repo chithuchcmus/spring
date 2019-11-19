@@ -230,7 +230,7 @@ Thay vào đó ta sử dụng list với á hiệu là các cột sẽ tương �
  
 Có thể dẫn đến error trong application nhưng sẽ không làm chết hết các node chỉ vì thiếu bộ nhớ.
 
-## Sring boot redis starter
+## Sring boot starter data redis
 
 ### Dependency
 
@@ -247,7 +247,7 @@ nó chứa các dependency con như spring-data-redis, reids-driver là lecctuce
 
 Redis và Lettuce đều là driver để sử dụng redis trong gói  spring-boot-starter-data-redis   .
 - Jedis: không đảm bảo thread-safe khi application muốn dùng một instance cho nhiều thread, để đảm bảo thì Jedis tiếp cận với hướng là connection pool, mỗi thead sử  dụng một instance của jedis, làm tăng chi phí kết nối với redis server.
-- Còn đối với lettuce thì có thể sử dụng một instance cho môi trường multi thread, do đó chỉ cần một instance lettuce kết nối với redis server ta cũng có thể đảm bảo thread-safe. Do đó redis sử dụng lettuce làm default driver để kết nối với redis.
+- Còn đối với lettuce thì có thể sử dụng một instance cho môi trường multi thread, do đó chỉ cần một instance lettuce kết nối với redis server ta cũng có thể đảm bảo thread-safe, ta có thể cấu hình việc instance lecttuce có thể tương tác với bao nhiêu client một lúc tối đa. Do đó redis sử dụng lettuce làm default driver để kết nối với redis.
 
 Mặc định trong spring-boot-starter-data-redis sử dụng lecctuce làm driver default, và để cấu hình lecctuce thì ta sử dụng các thuộc tính trong application.properties
 
@@ -305,7 +305,83 @@ spring.redis.timeout=0 # Connection timeout in milliseconds.
 
 ### Spring boot starter redis cache
 
-Ta sử dụng `@EnableCaching` để có thể sử  dụng redis như bộ nhớ cache trong controller
+Ta sử dụng `@EnableCaching` trong file config hoặc application để có thể sử  dụng redis như bộ nhớ cache bằng cách sử dụng các annotation sau trên các api của controller
+
+#### @Cacheable
+
+```java
+    @Cacheable(value = "users", key = "#userId")
+    @RequestMapping(value = "/{userId}", method = RequestMethod.GET)
+    public User getUser(@PathVariable String userId) {
+        LOG.info("Getting user with ID {}.", userId);
+        return userService.findUserById(Long.valueOf(userId));
+  }
+```
+
+khi gọi đên api này, đầu tiên sẽ check xem trong redis đã lưu cache lại chưa, nếu chưa thì nó sẽ gọi method getUser, và sẽ caching lại kết quả đó dưới redis, ở đây là cả Object user. Dưới redis, lưu dưới dạng string, key là tên được quy định trong `value`, còn giá trị là mã byte đã được decode
+![x](image/cache_get.png)
+
+#### @CacheEvict
+
+có chức năng remove các entry trong redis thông qua cacheName hoặc value, thường được dùng cho các controller delete. @cacheEvict có thể đươc sử dụng để xóa một, nhiều hay toàn bộ entry.
+
+```java
+    @CacheEvict(value = "users", key = "#userId")
+    @DeleteMapping("/{userId}")
+    public void deleteUserByID(@PathVariable Long userId) {
+        LOG.info("deleting person with id {}", userId);
+        userService.deleteUserById(userId);
+    }
+```
+
+Ở ví dụ trên, khi gọi api này, redis sẽ xóa dữ liệu trong database và xóa dữ liệu cache ở cả redis nếu đã được cache trước đó key là userId, hoặc có thể  xóa hết entry thông qua attribute khác như ` allEntries =true`.
+
+#### @CachePut
+
+dùng khi dữ liệu được thay đổi, thì cần cập nhật trong entry dưới redis để persist giữ cache và data, khi khai báo nó sẽ tự động cập nhật mà không cần thêm bất kì dòng code nào vào phương thức.
+
+```java
+    @CachePut( value = "users", key = "#user.id")
+    @PutMapping("/update")
+    public User updatePersonByID(@RequestBody User user) {
+        userService.saveUser(user);
+        return user;
+    }
+```
+
+khi gọi phương thức update user, với key là userId thì khi thực hiện phương thức nó sẽ cập nhật trên cả redis.
+
+#### Multi config cache @Caching
+
+với việc cấu hình multi annotation cache trên các method ta sử dụng @caching, ví dụ cụ thể sau đây
+```java
+
+@Caching(evict = { 
+  @CacheEvict("addresses"), 
+  @CacheEvict(value="directory", key="#customer.name") })
+public String getAddress(Customer customer) {...}
+```
+
+### Operation on Entity
+
+Ngoài việc thực hiện các việc cache trên thông qua các method trên controller, ta có thể  thực hiện các operation của redis trên các entity thông qua RedisTemplate, hoặc có thể dựa vào operation trên datatype cụ thể như `StringRedisTemplate`, `HashOperations`,...
+
+```java
+    @Bean
+    public RedisConnectionFactory redisConnectionFactory() {
+        LettuceConnectionFactory connectionFactory = new LettuceConnectionFactory();
+        return connectionFactory;
+    }
+    @Bean
+    public RedisTemplate<String, User> redisTemplate() {
+        RedisTemplate<String, User> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(redisConnectionFactory());
+        return redisTemplate;
+    }
+```
+
+Đầu tiên ta khởi tạo redisConnectionFactory, ở đây ta có thể config các cấu hình của mình thông qua constructor của lecttuce, ở đây ta có thê cấu hình port, cluster,...
+
 
 ## Refference
 
