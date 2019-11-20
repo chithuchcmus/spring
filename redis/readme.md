@@ -382,6 +382,7 @@ Ngoài việc thực hiện các việc cache trên thông qua các method trên
 
 Đầu tiên ta khởi tạo redisConnectionFactory, ở đây ta có thể config các cấu hình của mình thông qua constructor của lecttuce, ở đây ta có thê cấu hình port, cluster,...
 
+## Redission spring boot
 
 ## Refference
 

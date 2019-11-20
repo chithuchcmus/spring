@@ -17,6 +17,7 @@
         - [Position based parameter binding](#position-based-parameter-binding)
         - [named parameters](#named-parameters)
       - [Special parameter handling](#special-parameter-handling)
+        - [Paging](#paging)
       - [Limit Query Result](#limit-query-result)
 
 # Spring - JPA
@@ -263,6 +264,10 @@ List<User> findByLastname(String lastname, Pageable pageable);
 ```
 
 Với Pageable: ta có thể duyệt hết tất cả các phần tử và các pages được lưu trữ trong database
+
+##### Paging
+
+
 
 Với Slice: 
 
